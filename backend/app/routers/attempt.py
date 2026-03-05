@@ -103,3 +103,14 @@ async def submit_quiz(share_code: str, data: AttemptSubmit, db: Session = Depend
 
     return attempt
 
+@router.get("/{share_code}/questions", response_model=List[QuestionResponse])
+def get_quiz_questions(share_code: str, db: Session = Depends(get_db)):
+    quiz = db.query(Quiz).filter(Quiz.share_code == share_code).first()
+    if not quiz:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Тест не найден"
+        )
+    questions = db.query(Question).filter(Question.quiz_id == quiz.id).all()
+    return questions
+
